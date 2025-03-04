@@ -1,37 +1,4 @@
 import { create } from "zustand";
-import Database from "@tauri-apps/plugin-sql";
-
-
-async function connect(): Promise<Database> {
-  const database = await Database.load("sqlite:session.db");
-
-  // create tabel if no there
-  database.execute("CREATE TABLE IF NOT EXISTS session (url TEXT, token TEXT, date TEXT);");
-
-  return database;
-}
-
-export async function inserInto(data: Session): Promise<void> {
-  const db = await connect();
-
-  const date = new Date().toISOString();
-
-  await db.execute("Insert into session Values($1,$2,$3)", [data.url, data.token, date]);
-
-  db.close();
-
-  return;
-}
-
-export async function getLatestSession(): Promise<Session | null> {
-  const db = await connect();
-
-  const result = (await db.select<Session[]>("SELECT url, token FROM session ORDER BY date DESC LIMIT 1"))[0];
-
-  if (!result) return null;
-
-  return result
-}
 
 export type Session = {
   url: string;
@@ -43,9 +10,9 @@ export type Session = {
  */
 type SessionHook = {
   /** Current session data or null if no active session */
-  data: Session | null,
+  data: Session | null;
   /** Loading state for session data */
-  loading: boolean,
+  loading: boolean;
   /**
    * Updates the session data and persists it to the database
    * @param {Session} session - The session to set
@@ -55,7 +22,7 @@ type SessionHook = {
    * try {
    *   await useSession.getState().setSession(newSession);
    * } catch (error) {
-   *   console.error("Failed to set session:", error);
+   *   log("Failed to set session:", error);
    * }
    */
   setSession: (session: Session) => Promise<void>;
@@ -69,35 +36,31 @@ type SessionHook = {
    * try {
    *   await useSession.getState().initializeSession();
    * } catch (error) {
-   *   console.error("Failed to initialize session:", error);
+   *   log("Failed to initialize session:", error);
    * }
    */
   initializeSession: () => Promise<void>;
 };
 
+export const useSession = create<SessionHook>()((set) => ({
+  data: null,
+  loading: true,
+  setSession: async (session: Session) => {
+    set({ data: session });
+  },
+  clearSession: () => set({ data: null }),
+  initializeSession: async () => {
+    const latestSession = null;
 
-export const useSession = create<SessionHook>()(
-  (set) => ({
-    data: null,
-    loading: true,
-    setSession: async (session: Session) => {
-      set({ data: session })
-      await inserInto(session);
-    },
-    clearSession: () => set({ data: null }),
-    initializeSession: async () => {
-      const latestSession = await getLatestSession();
-
-      set(prevState => {
-        return {
-          ...prevState,
-          data: latestSession,
-          loading: false,
-        }
-      })
-    }
-  })
-);
+    set((prevState) => {
+      return {
+        ...prevState,
+        data: latestSession,
+        loading: false,
+      };
+    });
+  },
+}));
 
 /**
  * Initializes the session hook with data from the database
@@ -107,7 +70,7 @@ export const useSession = create<SessionHook>()(
  * try {
  *   await initializeSessionHook();
  * } catch (error) {
- *   console.error("Failed to initialize session hook:", error);
+ *   log("Failed to initialize session hook:", error);
  * }
  */
 export async function initializeSessionHook(): Promise<void> {

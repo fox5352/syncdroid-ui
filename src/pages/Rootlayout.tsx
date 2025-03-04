@@ -3,11 +3,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { initializeSessionHook } from "../store/session";
 import { log } from "../lib/logging";
 // ui
-import {
-  BottomNavigation,
-  BottomNavigationAction,
-  Box,
-} from "@mui/material";
+import { BottomNavigation, BottomNavigationAction, Box } from "@mui/material";
 import LoadingProvider from "../ui/LoadingModel";
 
 import { HomeMaxTwoTone, SyncAltTwoTone } from "@mui/icons-material";
@@ -49,22 +45,21 @@ function Rootlayout() {
     try {
       initializeSessionHook();
     } catch (error) {
-      log(`failed to initialize session hook in rootlayout ${error}`)
-
-      alert(`failed to initialize session hook in rootlayout ${error}`);
+      log(`failed to initialize session hook in rootlayout ${error}`);
     }
-
-  }, [])
+  }, []);
 
   return (
     <LoadingProvider>
-      <Box sx={{
-        height: "calc(100vh - 55px)",
-        width: "100%",
-        margin: 0,
-        padding: 0,
-        overflowY: "scroll",
-      }}>
+      <Box
+        sx={{
+          height: "calc(100vh - 55px)",
+          width: "100%",
+          margin: 0,
+          padding: 0,
+          overflowY: "scroll",
+        }}
+      >
         <Outlet />
       </Box>
       <BottomNavigation

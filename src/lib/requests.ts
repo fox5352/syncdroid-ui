@@ -78,7 +78,6 @@ export type FileType = {
   };
 };
 
-
 /**
  * Perform a request to the backend.
  *
@@ -113,7 +112,7 @@ async function request(
       Authorization: `Bearer ${token}`,
     },
     body: body,
-    signal
+    signal,
   };
 
   const res = await fetch(`${addr}/${url}`, options);
@@ -191,39 +190,33 @@ export async function getFiles<T>(
 
 export type FileTypeBuffer = FileType & {
   data?: {
-    type?: "Buffer",
-    data?: Uint8Array
-  }
-}
+    type?: "Buffer";
+    data?: Uint8Array;
+  };
+};
 
 export async function getFile(
   type: string,
-  fileData: { name: string, path: string },
+  fileData: { name: string; path: string },
   session: Session,
   signal?: AbortSignal
 ): Promise<[FileTypeBuffer | null, string | null]> {
   const encodedName = encodeURIComponent(fileData.name);
   const encodedPath = encodeURIComponent(fileData.path);
 
-  const url = `api/${type}/file?name=${encodedName}&path=${encodedPath}`
-  const res = await request(
-    url,
-    "GET",
-    session,
-    undefined,
-    signal
-  );
+  const url = `api/${type}/file?name=${encodedName}&path=${encodedPath}`;
+  const res = await request(url, "GET", session, undefined, signal);
 
   if (!res.ok) {
     return [
       null,
       `failed to request file type:${type}::${res.status}:${res.statusText}`,
-    ]
+    ];
   }
 
-  const data = await res.json()
+  const data = await res.json();
 
-  if (!data) return [null, 'failed to get data from the server'];
+  if (!data) return [null, "failed to get data from the server"];
 
   return [data.data, null];
 }

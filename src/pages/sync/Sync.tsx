@@ -1,11 +1,4 @@
 import { useState } from "react";
-import {
-  Format,
-  checkPermissions,
-  requestPermissions,
-  scan,
-  cancel,
-} from "@tauri-apps/plugin-barcode-scanner";
 
 import { Box, Button, Container, TextField } from "@mui/material";
 import { useSession } from "../../store/session";
@@ -25,58 +18,10 @@ export default function Sync() {
 
   const toggleMode = () => setMode(mode == "Manual" ? "Scan" : "Manual");
 
-  // BUG: change alert to toast that warn the user
-  const startScan = async () => {
-    const checkPerm = await checkPermissions();
-
-    if (checkPerm == "prompt") {
-      await requestPermissions();
-    }
-
-    if (checkPerm == "denied") {
-      setMode("Manual");
-      return;
-    }
-
-    if (checkPerm == "granted") {
-      setScanning(true);
-      const scanned = await scan({
-        windowed: true,
-        formats: [Format.QRCode],
-        cameraDirection: "back",
-      });
-
-      setScanning(false);
-
-      const data: unknown = scanned.content;
-
-      if (data == null) {
-        alert("Failed to scan");
-        return;
-      }
-
-      if (typeof data == "string") {
-        const [url, buffer] = data.split("?");
-        const params = new URLSearchParams(buffer);
-        const token = params.get("token");
-
-        if (!token) alert("Invalid token given");
-
-        if (url && token) {
-          setSession({ url, token });
-          navigate("/");
-        } else {
-          alert("Failed to  url or token");
-        }
-        return;
-      }
-
-      alert("type cast failed on string check");
-    }
-  };
+  // BUG: change log to toast that warn the user
+  const startScan = async () => {};
 
   const cancelScan = async () => {
-    await cancel();
     setScanning(false);
   };
 

@@ -6,7 +6,6 @@ import { Box, Menu, MenuItem, Typography } from "@mui/material";
 import styles from "./FileBlock.module.css";
 import { FileType, getFile } from "../../../lib/requests";
 import { useSession } from "../../../store/session";
-import { saveFileWithPicker } from "../../../lib/fileUtils";
 import { useLoadingState } from "../../../ui/LoadingModel";
 
 export type FileBlockProps = FileType;
@@ -113,9 +112,14 @@ export default function FileBlock({
       toggleLoadingState(() => {
         controller.abort();
         toggleLoadingState();
-      })
+      });
 
-      const [fileData, error] = await getFile(type, { name, path }, data, controller.signal);
+      const [fileData, error] = await getFile(
+        type,
+        { name, path },
+        data,
+        controller.signal
+      );
 
       toggleLoadingState(null);
 
@@ -123,15 +127,18 @@ export default function FileBlock({
 
       if (!fileData) throw new Error("file data is null");
 
-      await saveFileWithPicker(fileData, `${type}/${fileData.extension.replace(".", "")}`);
+      // TODO: add saving method here later
+      // await saveFileWithPicker(
+      //   fileData,
+      //   `${type}/${fileData.extension.replace(".", "")}`
+      // );
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') return;
+      if (error instanceof Error && error.name === "AbortError") return;
       //@ts-ignore
-      alert(`Error downloading ${type} :${error}`);
+      log(`Error downloading ${type} :${error}`);
       return;
     }
   };
-
 
   return (
     <>
