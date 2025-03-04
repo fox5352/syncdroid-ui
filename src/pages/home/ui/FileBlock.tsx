@@ -127,6 +127,14 @@ export default function FileBlock({
 
       if (!fileData) throw new Error("file data is null");
 
+      const content = fileData.data?.data;
+
+      if (!content) throw new Error("content is null");
+
+      window.Android.openDirectoryPicker(
+        `${fileData.name}${fileData.extension}`,
+        content
+      );
       // TODO: add saving method here later
       // await saveFileWithPicker(
       //   fileData,
